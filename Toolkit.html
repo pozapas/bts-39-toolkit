@@ -90,9 +90,12 @@
         body.dark .hover\:bg-blue-50:hover { background:rgba(37,99,235,.12) !important; }
         body.dark .hover\:bg-slate-50:hover { background:rgba(255,255,255,.03) !important; }
         body.dark label:hover { background:rgba(37,99,235,.10) !important; border-color:rgba(37,99,235,.3) !important; }
-        body.dark #tk-map svg { filter: brightness(.85) saturate(.9); }
-        body.dark .state.outScope { fill:rgba(255,255,255,.04); }
-        body.dark .state-border { stroke:rgba(255,255,255,.15); }
+        body.dark #tk-map svg { filter: none; }
+        body.dark .state.inScope { fill:rgba(96,165,250,.35); }
+        body.dark .state.outScope { fill:rgba(255,255,255,.10); }
+        body.dark .state.selected { fill:rgba(96,165,250,.70); }
+        body.dark .state-border { stroke:rgba(255,255,255,.28); }
+        body.dark .state { stroke:rgba(255,255,255,.22); }
 
         /* ── Dark mode: guide / info box text readability ── */
         body.dark .text-blue-900  { color:#bfdbfe !important; }
@@ -979,6 +982,21 @@
                             </ol>
                         </div>
 
+                        <details class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 text-xs text-emerald-900 leading-relaxed">
+                            <summary class="font-bold cursor-pointer">About the data &mdash; 5-step screening framework</summary>
+                            <div class="mt-2 space-y-1">
+                                <p>Last-leg crash candidates are identified from state-level crash records using a structured screening framework:</p>
+                                <ol class="pl-4 list-decimal space-y-0.5">
+                                    <li><strong>Temporal filter</strong> &mdash; Crashes between 5&nbsp;PM and 3&nbsp;AM on Friday, Saturday, and Sunday nights, including holiday long-weekend extensions.</li>
+                                    <li><strong>Transfer-point proximity</strong> &mdash; Crashes within a 2-mile buffer of park-and-ride facilities, transit stations, or airports.</li>
+                                    <li><strong>Residential context</strong> &mdash; Crash block group (or adjacent block group) has &ge;80% residential land use.</li>
+                                    <li><strong>Roadway context</strong> &mdash; Exclude crashes on interstate highways and freeways.</li>
+                                    <li><strong>Final classification</strong> &mdash; Crashes meeting all four criteria above are classified as potential last-leg candidates.</li>
+                                </ol>
+                                <p class="mt-1 text-emerald-700 italic">States analyzed and study periods: WA (2018&ndash;2023), OR (2018&ndash;2023), CA (2018&ndash;2022), TX (2021&ndash;2024). Year 2020 excluded where applicable.</p>
+                            </div>
+                        </details>
+
                         <div id="tk-map"></div>
                         <div class="flex gap-3 flex-wrap mt-3 text-xs text-slate-500">
                             <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:rgba(37,99,235,.35)"></span> Included in analysis</span>
@@ -1007,6 +1025,7 @@
                                 <p class="text-xs text-slate-400 font-semibold">Selected state</p>
                                 <p class="text-lg font-extrabold tk-mono mt-1" id="quickState">&mdash;</p>
                                 <p class="text-xs text-slate-400 mt-1" id="quickScopeHint">Select OR / WA / CA / TX to enable "See Details".</p>
+                                <p class="text-xs text-slate-500 mt-0.5" id="quickStudyYears"></p>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
                                 <p class="text-xs text-slate-400 font-semibold">Total crashes</p>
@@ -1026,7 +1045,7 @@
                             <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
                                 <p class="text-xs text-slate-400 font-semibold">Impaired in time window</p>
                                 <p class="text-lg font-extrabold tk-mono mt-1" id="quickWindowShare">&mdash;</p>
-                                <p class="text-xs text-slate-400 mt-1">5 PM–3 AM, Fri–Sun + holidays.</p>
+                                <p class="text-xs text-slate-400 mt-1" id="quickWindowNote">5 PM–3 AM, Fri–Sun + holidays.</p>
                             </div>
                             <div class="col-span-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
                                 <p class="text-xs text-slate-400 font-semibold">Final "last-leg" candidates</p>
@@ -1111,7 +1130,7 @@
                                     <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
                                         <p class="text-xs text-slate-400 font-semibold">Impaired in time window</p>
                                         <p class="text-base font-extrabold tk-mono mt-0.5" id="mWindow">&mdash;</p>
-                                        <p class="text-xs text-slate-400 mt-1">5 PM&ndash;3 AM, Fri&ndash;Sun + long weekends.</p>
+                                        <p class="text-xs text-slate-400 mt-1" id="mWindowNote">5 PM&ndash;3 AM, Fri&ndash;Sun + long weekends.</p>
                                     </div>
                                 </div>
 
@@ -2246,24 +2265,24 @@
             WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"
         },
         crash: {
-            OR: { years:"2018–2023 (excluding 2020)", totalCrashes:245000, impairedCrashes:9800, impairedInWindowShare:0.62,
-                  hod:[2,3,4,6,8,10,12,14,16,18,20,22,21,19,17,14,11,9,7,6,5,4,3,2],
-                  hodNote:"Placeholder curve.", candidatesNearTransferPoints:1600, afterResidentialContext:980, finalLastLegCandidates:760 },
-            WA: { years:"2018–2023 (excluding 2020)", totalCrashes:310000, impairedCrashes:11200, impairedInWindowShare:0.58,
-                  hod:[2,3,5,7,10,14,18,22,24,26,27,28,27,25,22,18,14,11,8,6,5,4,3,2],
-                  hodNote:"Placeholder.", candidatesNearTransferPoints:1900, afterResidentialContext:1100, finalLastLegCandidates:880 },
-            CA: { years:"2018–2023 (excluding 2020)", totalCrashes:980000, impairedCrashes:40200, impairedInWindowShare:0.60,
-                  hod:[2,3,4,6,9,12,16,20,25,28,30,32,31,29,26,22,18,14,10,8,6,5,4,3],
-                  hodNote:"Placeholder.", candidatesNearTransferPoints:8200, afterResidentialContext:5200, finalLastLegCandidates:4100 },
-            TX: { years:"2018–2023 (excluding 2020)", totalCrashes:860000, impairedCrashes:38800, impairedInWindowShare:0.64,
-                  hod:[2,3,4,6,9,13,18,24,28,30,32,33,33,31,27,22,17,13,10,8,6,5,4,3],
-                  hodNote:"Placeholder.", candidatesNearTransferPoints:7400, afterResidentialContext:4700, finalLastLegCandidates:3600 }
+            OR: { years:"2018\u20132023 (excl. 2020)", totalCrashes:237405, impairedCrashes:15130, impairedInWindow:6069, impairedInWindowShare:0.4011,
+                  hod:[6.75,7.69,7.93,9.89,10.99,12.32,11.30,12.40,10.13,10.60],
+                  hodNote:"Hourly % of impaired crashes in the last-leg time window (5 PM\u20132 AM, Fri\u2013Sun + holidays).", candidatesNearTransferPoints:4195, afterResidentialContext:1344, finalLastLegCandidates:1274 },
+            WA: { years:"2018\u20132023 (excl. 2020)", totalCrashes:534674, impairedCrashes:38777, impairedInWindow:15312, impairedInWindowShare:0.3949,
+                  hod:[7.58,8.27,8.55,9.39,10.48,10.72,10.54,12.04,10.97,11.11],
+                  hodNote:"Hourly % of impaired crashes in the last-leg time window (5 PM\u20132 AM, Fri\u2013Sun + holidays).", candidatesNearTransferPoints:13691, afterResidentialContext:9545, finalLastLegCandidates:6688 },
+            CA: { years:"2018\u20132022", totalCrashes:829649, impairedCrashes:144284, impairedInWindow:25004, impairedInWindowShare:0.1733,
+                  hod:[8.29,6.10,8.78,13.90,9.27,10.73,11.22,9.02,9.27,13.41],
+                  hodNote:"Hourly % of impaired crashes in the last-leg time window (5 PM\u20132 AM, Fri\u2013Sun + holidays).", candidatesNearTransferPoints:2282, afterResidentialContext:422, finalLastLegCandidates:410 },
+            TX: { years:"2021\u20132024", totalCrashes:5106717, impairedCrashes:2541083, impairedInWindow:35361, impairedInWindowShare:0.0139,
+                  hod:[8.07,9.04,8.16,9.44,9.90,9.73,9.84,10.17,10.89,14.20],
+                  hodNote:"Hourly % of impaired crashes in the last-leg time window (5 PM\u20132 AM, Fri\u2013Sun + holidays).", candidatesNearTransferPoints:16363, afterResidentialContext:5140, finalLastLegCandidates:4768 }
         },
         transfer: {
-            OR: { share:{"Transit station":0.55,"Park-and-ride":0.35,"Airport":0.10}, intensity:{"Transit station":0.9,"Park-and-ride":1.6,"Airport":0.7}, note:"Placeholder." },
-            WA: { share:{"Transit station":0.58,"Park-and-ride":0.30,"Airport":0.12}, intensity:{"Transit station":1.0,"Park-and-ride":1.4,"Airport":0.8}, note:"Placeholder." },
-            CA: { share:{"Transit station":0.60,"Park-and-ride":0.28,"Airport":0.12}, intensity:{"Transit station":0.8,"Park-and-ride":1.3,"Airport":0.6}, note:"Placeholder." },
-            TX: { share:{"Transit station":0.45,"Park-and-ride":0.45,"Airport":0.10}, intensity:{"Transit station":0.7,"Park-and-ride":1.8,"Airport":0.7}, note:"Placeholder." }
+            OR: { share:{"Transit station":0.9937,"Park-and-ride":0.0047,"Airport":0.0016}, intensity:{"Transit station":0.14,"Park-and-ride":0.12,"Airport":0.01} },
+            WA: { share:{"Transit station":0.9626,"Park-and-ride":0.0272,"Airport":0.0102}, intensity:{"Transit station":0.29,"Park-and-ride":0.50,"Airport":0.22} },
+            CA: { share:{"Transit station":0.9049,"Park-and-ride":0.0951,"Airport":0.0000}, intensity:{"Transit station":0.03,"Park-and-ride":0.00,"Airport":0.00} },
+            TX: { share:{"Transit station":0.9846,"Park-and-ride":0.0015,"Airport":0.0139}, intensity:{"Transit station":0.42,"Park-and-ride":0.33,"Airport":0.06} }
         },
         practitioner: {
             strategies: [
@@ -2330,19 +2349,40 @@
     ═══════════════════════════ */
     const CBG_SIGNALS = {
         WA: [
-            { v:"Age 18–20",dir:"Higher",pct:13.26 },{ v:"Age 21–24",dir:"Higher",pct:26.47 },
-            { v:"Age 25–34",dir:"Higher",pct:25.20 },{ v:"Age 35–44",dir:"Higher",pct:12.35 },
+            { v:"Age 18\u201320",dir:"Higher",pct:13.26 },{ v:"Age 21\u201324",dir:"Higher",pct:26.47 },
+            { v:"Age 25\u201334",dir:"Higher",pct:25.20 },{ v:"Age 35\u201344",dir:"Higher",pct:12.35 },
             { v:"Male",dir:"Higher",pct:7.01 },{ v:"Female",dir:"Higher",pct:8.59 },
             { v:"Native Hawaiian / Pacific Islander",dir:"Higher",pct:48.34 },{ v:"Other race",dir:"Higher",pct:26.99 },
-            { v:"Mean income",dir:"Lower",pct:-5.21 },{ v:"Median income",dir:"Lower",pct:-6.73 },
+            { v:"Mean income",dir:"Lower",pct:-6.90 },
             { v:"Proportion student",dir:"Higher",pct:17.89 },{ v:"Average housing units",dir:"Higher",pct:10.31 },
-            { v:"Average population",dir:"Higher",pct:7.79 },{ v:"% single-family households",dir:"Lower",pct:-14.78 },
-            { v:"% multi-family households",dir:"Higher",pct:45.35 },{ v:"Households with 0 vehicles",dir:"Higher",pct:38.03 },
-            { v:"Households with 1 vehicle",dir:"Higher",pct:30.67 },{ v:"Population density",dir:"Higher",pct:31.34 }
+            { v:"Average population",dir:"Higher",pct:7.79 },{ v:"% single-family households",dir:"Lower",pct:-7.48 },
+            { v:"% multi-family households",dir:"Higher",pct:55.60 },{ v:"Households with 0 vehicles",dir:"Higher",pct:38.03 },
+            { v:"Households with 1 vehicle",dir:"Higher",pct:30.67 }
         ],
-        OR: [ { v:"Young adult population",dir:"Higher",pct:12.5 }, { v:"Median income",dir:"Higher",pct:6.8 } ],
-        CA: [ { v:"Young adult population",dir:"Higher",pct:9.4 }, { v:"Population density",dir:"Higher",pct:18.2 }, { v:"Student population",dir:"Higher",pct:7.1 } ],
-        TX: [ { v:"Young adult population",dir:"Higher",pct:8.9 } ]
+        OR: [
+            { v:"Age 25\u201334",dir:"Higher",pct:28.76 },{ v:"Age 35\u201344",dir:"Higher",pct:21.72 },
+            { v:"Male",dir:"Higher",pct:6.84 },{ v:"Female",dir:"Higher",pct:7.66 },
+            { v:"African American",dir:"Higher",pct:96.32 },{ v:"American Indian / Alaska Native",dir:"Higher",pct:61.83 },
+            { v:"Native Hawaiian / Pacific Islander",dir:"Higher",pct:97.41 },{ v:"Other race",dir:"Higher",pct:29.80 },
+            { v:"Average population",dir:"Higher",pct:7.25 },
+            { v:"% single-family households",dir:"Lower",pct:-11.09 },{ v:"% multi-family households",dir:"Higher",pct:29.98 },
+            { v:"Vehicle per person",dir:"Lower",pct:-10.57 },
+            { v:"Households with 0 vehicles",dir:"Higher",pct:38.44 },{ v:"Households with 1 vehicle",dir:"Higher",pct:26.61 },
+            { v:"% drive alone",dir:"Lower",pct:-6.58 },{ v:"% use transit",dir:"Higher",pct:108.15 }
+        ],
+        CA: [
+            { v:"Asian",dir:"Higher",pct:31.03 },{ v:"Other race",dir:"Higher",pct:7.44 },
+            { v:"Proportion student",dir:"Lower",pct:-6.51 },{ v:"Average housing units",dir:"Higher",pct:9.86 },
+            { v:"Population density",dir:"Lower",pct:-31.66 },{ v:"Household density",dir:"Lower",pct:-31.13 },
+            { v:"% single-family households",dir:"Higher",pct:6.30 },{ v:"Households with 0 vehicles",dir:"Lower",pct:-14.17 }
+        ],
+        TX: [
+            { v:"Age 25\u201334",dir:"Higher",pct:9.80 },{ v:"Age 65+",dir:"Lower",pct:-5.33 },
+            { v:"Asian",dir:"Higher",pct:23.54 },{ v:"Other race",dir:"Higher",pct:21.20 },
+            { v:"% single-family households",dir:"Higher",pct:6.30 },
+            { v:"Vehicle per person",dir:"Lower",pct:-11.99 },
+            { v:"% drive alone",dir:"Lower",pct:-5.98 },{ v:"% use transit",dir:"Higher",pct:93.10 }
+        ]
     };
 
     /* ═══════════════════════════
@@ -2559,6 +2599,7 @@
         d3.selectAll(".state").classed("selected",false);
         document.getElementById("quickState").textContent = "—";
         document.getElementById("quickScopeHint").textContent = 'Select OR / WA / CA / TX to enable "See Details".';
+        document.getElementById("quickStudyYears").textContent = "";
         setQuickKpis(null);
         detailsBtn.disabled = true;
         if (window.tkApp) {
@@ -2582,12 +2623,14 @@
 
         if (!abbr || !focusSet.has(abbr)) {
             document.getElementById("quickScopeHint").textContent = abbr ? "This state is not in the current analysis set." : "Unknown state.";
+            document.getElementById("quickStudyYears").textContent = "";
             setQuickKpis(null);
             detailsBtn.disabled = true;
             return;
         }
 
         document.getElementById("quickScopeHint").textContent = 'Click "See Details" to open the full dashboard.';
+        document.getElementById("quickStudyYears").textContent = DATA.crash[abbr] ? `Study period: ${DATA.crash[abbr].years}` : "";
         setQuickKpis(DATA.crash[abbr]);
         detailsBtn.disabled = false;
 
@@ -2601,13 +2644,19 @@
     function setQuickKpis(d) {
         if (!d) {
             ["quickTotal","quickImpaired","quickImpairedPct","quickWindowShare","quickLastLeg"].forEach(id => document.getElementById(id).textContent = "—");
+            if (document.getElementById("quickWindowNote")) document.getElementById("quickWindowNote").textContent = "5 PM\u20133 AM, Fri\u2013Sun + holidays.";
             return;
         }
         document.getElementById("quickTotal").textContent       = fmtNum(d.totalCrashes);
         document.getElementById("quickImpaired").textContent    = fmtNum(d.impairedCrashes);
         document.getElementById("quickImpairedPct").textContent = fmtPct(d.impairedCrashes / d.totalCrashes, 1);
-        document.getElementById("quickWindowShare").textContent = fmtPct(d.impairedInWindowShare, 0);
+        document.getElementById("quickWindowShare").textContent = d.impairedInWindow ? fmtNum(d.impairedInWindow) : fmtPct(d.impairedInWindowShare, 0);
         document.getElementById("quickLastLeg").textContent     = fmtNum(d.finalLastLegCandidates);
+        if (document.getElementById("quickWindowNote")) {
+            document.getElementById("quickWindowNote").textContent = d.impairedInWindow ?
+                fmtPct(d.impairedInWindowShare,1) + " of impaired. 5 PM\u20133 AM, Fri\u2013Sun + holidays." :
+                "5 PM\u20133 AM, Fri\u2013Sun + holidays.";
+        }
     }
 
     /* ═══════════════════════════
@@ -2616,7 +2665,7 @@
     document.getElementById("copySummaryBtn").addEventListener("click", async ()=>{
         if (!currentState || !focusSet.has(currentState)) return;
         const name = DATA.abbrToName[currentState], c = DATA.crash[currentState], p = DATA.public[currentState] || DATA.public.OR;
-        const summary = `BTS-39 Last-Leg Dashboard Summary — ${name} (${currentState})\n\nCrash snapshot (study years: ${c.years})\n- Total crashes: ${fmtNum(c.totalCrashes)}\n- Impaired crashes: ${fmtNum(c.impairedCrashes)} (${fmtPct(c.impairedCrashes/c.totalCrashes,1)} of total)\n- Impaired in last-leg window: ${fmtPct(c.impairedInWindowShare,0)}\n- Near transfer points: ${fmtNum(c.candidatesNearTransferPoints)}\n- After residential context: ${fmtNum(c.afterResidentialContext)}\n- Final last-leg candidates: ${fmtNum(c.finalLastLegCandidates)}\n\nPublic survey\n- Max wait: ${p.maxWait}\n- Max price: ${p.maxPrice}\n- Safety effect: ${p.safetyEffect}\n`;
+        const summary = `BTS-39 Last-Leg Dashboard Summary — ${name} (${currentState})\n\nCrash snapshot (study years: ${c.years})\n- Total crashes: ${fmtNum(c.totalCrashes)}\n- Impaired crashes: ${fmtNum(c.impairedCrashes)} (${fmtPct(c.impairedCrashes/c.totalCrashes,1)} of total)\n- Impaired in last-leg window: ${c.impairedInWindow ? fmtNum(c.impairedInWindow) + ' (' + fmtPct(c.impairedInWindowShare,1) + ' of impaired)' : fmtPct(c.impairedInWindowShare,0)}\n- Near transfer points: ${fmtNum(c.candidatesNearTransferPoints)}\n- After residential context: ${fmtNum(c.afterResidentialContext)}\n- Final last-leg candidates: ${fmtNum(c.finalLastLegCandidates)}\n\nPublic survey\n- Max wait: ${p.maxWait}\n- Max price: ${p.maxPrice}\n- Safety effect: ${p.safetyEffect}\n`;
         try { await navigator.clipboard.writeText(summary); alert("Copied summary to clipboard."); }
         catch(e) { alert("Copy failed — manually select and copy."); }
     });
@@ -2635,7 +2684,12 @@
         // Overview KPIs
         document.getElementById("mTotal").textContent      = fmtNum(c.totalCrashes);
         document.getElementById("mImpaired").textContent   = fmtNum(c.impairedCrashes);
-        document.getElementById("mWindow").textContent     = fmtPct(c.impairedInWindowShare,0);
+        document.getElementById("mWindow").textContent     = c.impairedInWindow ? fmtNum(c.impairedInWindow) : fmtPct(c.impairedInWindowShare,0);
+        if (document.getElementById("mWindowNote")) {
+            document.getElementById("mWindowNote").textContent = c.impairedInWindow ?
+                fmtPct(c.impairedInWindowShare,1) + " of impaired. 5 PM\u20133 AM, Fri\u2013Sun + long weekends." :
+                "5 PM\u20133 AM, Fri\u2013Sun + long weekends.";
+        }
         document.getElementById("mNearTP").textContent     = fmtNum(c.candidatesNearTransferPoints);
         document.getElementById("mResidential").textContent= fmtNum(c.afterResidentialContext);
         document.getElementById("mFinal").textContent      = fmtNum(c.finalLastLegCandidates);
@@ -2723,9 +2777,10 @@
         let d=""; series.forEach((v,i)=>{ d+=(i===0?"M":"L")+x(i)+","+y(v)+" "; });
         svg.appendChild(svgEl("path",{d,fill:"none",stroke:"rgba(37,99,235,.95)","stroke-width":"2.6"}));
         if(opts.highlightPeak){const pv=Math.max(...series),pi=series.indexOf(pv); svg.appendChild(svgEl("circle",{cx:x(pi),cy:y(pv),r:"5.5",fill:"rgba(16,185,129,.92)"}));}
-        const labels=["5p","7p","9p","11p","1a","3a"], idxs=[0,2,4,6,8,10].map(i=>Math.min(series.length-1,i*2));
+        const labels=["5PM","7PM","9PM","11PM","1AM","2AM"];
+        const idxs = series.length <= 10 ? [0,2,4,6,8,Math.min(series.length-1,9)] : [0,4,8,12,16,Math.min(series.length-1,20)];
         idxs.forEach((idx,i)=>{const t=svgEl("text",{x:x(idx),y:H-10,fill:"rgba(85,98,122,.9)","font-size":"11","text-anchor":"middle"});t.textContent=labels[i]||"";svg.appendChild(t);});
-        const yl=svgEl("text",{x:pad.l,y:12,fill:"rgba(85,98,122,.9)","font-size":"11","text-anchor":"start"});yl.textContent="Normalized count";svg.appendChild(yl);
+        const yl=svgEl("text",{x:pad.l,y:12,fill:"rgba(85,98,122,.9)","font-size":"11","text-anchor":"start"});yl.textContent="% of crashes";svg.appendChild(yl);
     }
 
     /* ═══════════════════════════
@@ -2812,7 +2867,7 @@
         const topMsg = SURVEY.messages[0].text;
         el.innerHTML = `<b>Context for ${DATA.abbrToName[stateAbbr]}:</b>
 <ul class="list-disc pl-5 mt-1 space-y-0.5 text-xs text-blue-900">
-  <li><b>Timing:</b> impaired last-leg share is ${fmtPct(c.impairedInWindowShare,0)}</li>
+  <li><b>Timing:</b> ${c.impairedInWindow ? fmtNum(c.impairedInWindow) + ' impaired crashes in time window (' + fmtPct(c.impairedInWindowShare,1) + ' of impaired)' : 'impaired last-leg share is ' + fmtPct(c.impairedInWindowShare,0)}</li>
   <li><b>Facility:</b> most common = ${topShare?topShare[0]:"—"}; highest intensity = ${topIntensity?topIntensity[0]:"—"}</li>
   <li><b>Public thresholds:</b> wait ≈ ${pub.maxWait}; price ≈ ${pub.maxPrice}</li>
   <li><b>Top barriers (public):</b> ${SURVEY.barriers.slice(0,3).map(b=>b.label).join(", ")}</li>
