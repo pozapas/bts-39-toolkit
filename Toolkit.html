@@ -5,18 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTS-39: Last Leg Toolkit</title>
 
+    <!-- Preconnect to CDN origins for faster loading on mobile -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
     <!-- CDN Dependencies -->
+    <!-- Tailwind MUST load before render (generates CSS at runtime) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js, D3, topojson needed by inline scripts — cannot defer -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lucide icons: defer is safe (all calls guarded with if(window.lucide)) -->
+    <script defer src="https://unpkg.com/lucide@0.344.0"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
         [x-cloak] { display: none !important; }
+
+        /* ── Mobile-first fallback ── */
+        /* Ensures basic layout works even if Tailwind CDN is slow on mobile */
+        body {
+            display: flex;
+            min-height: 100vh;
+            min-height: 100dvh;   /* dynamic viewport height — avoids mobile browser chrome issues */
+            overflow: hidden;
+            margin: 0;
+        }
+        @media (max-width: 1023px) {
+            aside   { position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
+                      transform: translateX(-100%); transition: transform .3s; }
+            main    { flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; }
+        }
 
         /* ── Dark mode overrides ── */
         body.dark { background:#0f172a; color:#e2e8f0; }
@@ -740,11 +767,34 @@
         }
     </script>
 
-    <!-- Alpine.js (loaded after app function is defined) -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <!-- Alpine.js (loaded after app function is defined; defer lets HTML parse first) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 </head>
 
-<body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden" x-data="toolkitApp()">
+<body class="bg-slate-50 text-slate-800 h-screen h-[100dvh] flex overflow-hidden" x-data="toolkitApp()" x-cloak>
+
+    <!-- ═══════════════════════════════════════
+         LOADING SCREEN  (visible while CDN scripts load on mobile)
+    ═══════════════════════════════════════ -->
+    <div id="tk-loading"
+         style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f8fafc;font-family:'Inter',system-ui,sans-serif;">
+        <div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;"></div>
+        <p style="font-size:14px;font-weight:600;color:#475569;">Loading BTS-39 Toolkit…</p>
+        <p style="font-size:11px;color:#94a3b8;margin-top:4px;">Please wait while resources load</p>
+        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+    <script>
+        // Remove loading screen once Alpine.js has initialized (all CDNs loaded)
+        document.addEventListener('alpine:init', function() {
+            var el = document.getElementById('tk-loading');
+            if (el) el.style.display = 'none';
+        });
+        // Fallback: remove after 8 seconds no matter what
+        setTimeout(function() {
+            var el = document.getElementById('tk-loading');
+            if (el) el.style.display = 'none';
+        }, 8000);
+    </script>
 
     <!-- ═══════════════════════════════════════
          WELCOME / INTRO  POPUP
@@ -757,11 +807,11 @@
              class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-[fadeUp_.35s_ease]">
 
             <!-- Header -->
-            <div class="px-10 pt-10 pb-6 text-center">
+            <div class="px-5 pt-6 pb-4 md:px-10 md:pt-10 md:pb-6 text-center">
                 <div class="inline-flex items-center gap-2 mb-4">
                     <span class="text-[10px] uppercase tracking-widest font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">BTSCRP Project BTS-39</span>
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-800 leading-tight">The "Last Leg" Impaired Driving<br>Challenge</h2>
+                <h2 class="text-xl md:text-3xl font-extrabold text-slate-800 leading-tight">The "Last Leg" Impaired Driving<br>Challenge</h2>
                 <p class="mt-5 text-sm text-slate-500 leading-relaxed max-w-2xl mx-auto">
                     Driving under the influence of alcohol or drugs remains a persistent highway safety issue,
                     causing over 10,000 deaths annually in the U.S. One emerging challenge is the "last leg"
@@ -793,7 +843,7 @@
             </div>
 
             <!-- What this toolkit provides -->
-            <div class="px-10 py-8">
+            <div class="px-5 py-5 md:px-10 md:py-8">
                 <h3 class="text-lg font-bold text-slate-800 mb-4">What This Toolkit Provides</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
                     <div class="flex items-start gap-3">
@@ -816,7 +866,7 @@
             </div>
 
             <!-- Footer / CTA -->
-            <div class="px-10 pb-8 text-center">
+            <div class="px-5 pb-6 md:px-10 md:pb-8 text-center">
                 <button @click="showIntroPopup = false; $nextTick(() => { if(window.lucide) lucide.createIcons(); })"
                         class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg transition">
                     Explore the Toolkit
@@ -904,7 +954,7 @@
         </header>
 
         <!-- Scrollable content pane -->
-        <div class="flex-1 overflow-y-auto p-8 custom-scroll relative">
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scroll relative">
 
             <!-- ═════════════════════════════
                  TAB 1 ─ STATE MAP & DATA
