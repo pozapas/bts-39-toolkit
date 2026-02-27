@@ -1059,6 +1059,7 @@
                             <button id="detailsBtn" disabled class="px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition">See Details</button>
                             <button id="copySummaryBtn" class="px-4 py-2 text-xs font-bold rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition">Copy Summary</button>
                         </div>
+                        <p id="detailsScrollHint" class="text-xs text-slate-500 mt-2 text-left hidden">Please scroll down to view the full dashboard.</p>
                     </div>
                 </div>
 
@@ -2592,6 +2593,7 @@
             renderDashboard(currentState);
             initActionPlanControlsOnce();
             updateBuilderHighlights(currentState);
+            document.getElementById("detailsScrollHint").classList.remove("hidden");
         }
     });
 
@@ -2600,6 +2602,7 @@
         d3.selectAll(".state").classed("selected",false);
         document.getElementById("quickState").textContent = "—";
         document.getElementById("quickScopeHint").textContent = 'Select OR / WA / CA / TX to enable "See Details".';
+        document.getElementById("detailsScrollHint").classList.add("hidden");
         document.getElementById("quickStudyYears").textContent = "";
         setQuickKpis(null);
         detailsBtn.disabled = true;
@@ -2624,6 +2627,7 @@
 
         if (!abbr || !focusSet.has(abbr)) {
             document.getElementById("quickScopeHint").textContent = abbr ? "This state is not in the current analysis set." : "Unknown state.";
+            document.getElementById("detailsScrollHint").classList.add("hidden");
             document.getElementById("quickStudyYears").textContent = "";
             setQuickKpis(null);
             detailsBtn.disabled = true;
@@ -2631,6 +2635,7 @@
         }
 
         document.getElementById("quickScopeHint").textContent = 'Click "See Details" to open the full dashboard.';
+        document.getElementById("detailsScrollHint").classList.add("hidden");
         document.getElementById("quickStudyYears").textContent = DATA.crash[abbr] ? `Study period: ${DATA.crash[abbr].years}` : "";
         setQuickKpis(DATA.crash[abbr]);
         detailsBtn.disabled = false;
