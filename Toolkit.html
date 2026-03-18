@@ -1054,6 +1054,10 @@
                             </div>
                         </div>
 
+                        <div id="quickTexasNote" class="hidden mt-3 bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800 leading-relaxed">
+                            <p><strong>Note:</strong> Texas (2023&ndash;2024) lacked person-level alcohol impairment data, so impairment was approximated using contributing-factor variables; the same definition was applied to 2021&ndash;2022 for consistency.</p>
+                        </div>
+
                         <div class="flex gap-3 justify-end mt-4">
                             <button id="resetBtn" class="px-4 py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition">Reset</button>
                             <button id="detailsBtn" disabled class="px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition">See Details</button>
@@ -2586,6 +2590,12 @@
     const detailsBtn = document.getElementById("detailsBtn");
     const resetBtn   = document.getElementById("resetBtn");
 
+    function toggleQuickTexasNote(abbr) {
+        const noteEl = document.getElementById("quickTexasNote");
+        if (!noteEl) return;
+        noteEl.classList.toggle("hidden", abbr !== "TX");
+    }
+
     detailsBtn.addEventListener("click",()=>{
         if (currentState && focusSet.has(currentState)) {
             if (window.tkApp) { window.tkApp.showDashboard = true; window.tkApp.dashboardSubTab = 'overview'; }
@@ -2601,6 +2611,7 @@
         d3.selectAll(".state").classed("selected",false);
         document.getElementById("quickState").textContent = "—";
         document.getElementById("quickScopeHint").textContent = 'Select OR / WA / CA / TX to enable "See Details".';
+        toggleQuickTexasNote(null);
         document.getElementById("detailsScrollHint").classList.add("hidden");
         document.getElementById("quickStudyYears").textContent = "";
         setQuickKpis(null);
@@ -2617,6 +2628,7 @@
         if (el) d3.select(el).classed("selected",true);
         currentState = abbr; window.currentState = abbr;
         const name = DATA.abbrToName[abbr] || "Unknown";
+        toggleQuickTexasNote(abbr);
         if (window.tkApp) {
             window.tkApp.selectedStateAbbr = abbr || '';
             window.tkApp.selectedStateName = name;
@@ -2626,6 +2638,7 @@
 
         if (!abbr || !focusSet.has(abbr)) {
             document.getElementById("quickScopeHint").textContent = abbr ? "This state is not in the current analysis set." : "Unknown state.";
+            toggleQuickTexasNote(null);
             document.getElementById("detailsScrollHint").classList.add("hidden");
             document.getElementById("quickStudyYears").textContent = "";
             setQuickKpis(null);
