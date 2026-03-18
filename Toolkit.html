@@ -2576,9 +2576,8 @@
             .attr("class","state-border").attr("d",path);
 
         // Auto-select Oregon
-            // Auto-select Texas
-            const txNode = mapSvg.selectAll(".state").filter(d => fipsToAbbr[+d.id]==="TX").node();
-            if (txNode) selectState("TX", txNode);
+        const orNode = mapSvg.selectAll(".state").filter(d => fipsToAbbr[+d.id] === "OR").node();
+        if (orNode) selectState("OR", orNode);
     })();
 
     /* ═══════════════════════════
